@@ -4,9 +4,10 @@ model_meta:
   ptype: lp
   architecture: feedforward
   activation: relu
-  check: constraint
+  check: distance
+  report: 'no'
+  solver: gurobi
   engine: milp
-  report: yes
 
 
 verification_spec:
