@@ -23,8 +23,10 @@ def export_to_yaml(model, meta, path):
             "ptype": "lp",
             "architecture": "feedforward",
             "activation": "relu",
-            "check": "distance",
+            "check": "constraint",
             "report": "no",
+            "solver": "gurobi",
+            "engine": "milp"
         },
         "verification_spec": {
             "input_bounds": meta["input_bounds"],

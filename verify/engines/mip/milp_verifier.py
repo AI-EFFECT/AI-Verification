@@ -17,7 +17,9 @@ class VerifierConfig:
     big_m: float = 1e6
     bound_u: float = 1000.0
     solver_name: str = 'glpk'
-    solver_options: Dict[str, Any] = field(default_factory=dict)
+    solver_options: Dict[str, Any] = field(
+        default_factory=lambda: {'OutputFlag': 0, 'LogToConsole': 0}
+    )
     use_obbt: bool = True
     verbose: bool = False
     numerical_tolerance: float = 1e-6
@@ -254,7 +256,8 @@ class OBBTComputer(BoundComputer):
         # Minimize
         model.obj = aml.Objective(expr=target_expr, sense=aml.minimize)
         solver = SolverFactory(config.solver_name)
-        result = solver.solve(model, tee=False)
+        result = solver.solve(model, tee=config.verbose, 
+            options=config.solver_options)
         
         if result.solver.termination_condition != TerminationCondition.optimal:
             # Fallback to IA bounds if optimization fails
@@ -265,7 +268,8 @@ class OBBTComputer(BoundComputer):
         # Maximize (reuse model, just change objective)
         model.del_component(model.obj)
         model.obj = aml.Objective(expr=target_expr, sense=aml.maximize)
-        result = solver.solve(model, tee=False)
+        result = solver.solve(model, tee=config.verbose, 
+            options=config.solver_options)
         
         if result.solver.termination_condition != TerminationCondition.optimal:
             # Fallback to IA bounds if optimization fails
