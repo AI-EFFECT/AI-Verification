@@ -52,7 +52,7 @@ def run_lp_verification(loader):
         
         if engine_type == "crown":
             raise NotImplementedError("CROWN engine does not currently support 'distance' (optimality gap) checks.")
-        
+
         result = verifier.verify_lp_optimality_gap(
             spec=spec, 
             input_bounds=spec.input_bounds

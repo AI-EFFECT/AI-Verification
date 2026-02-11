@@ -36,23 +36,11 @@ In many cost-minimization problems, the mathematical "cheapest" solution is simp
 
 This forces the Neural Network to learn the "Load Following" logic—it must increase output variables whenever the input demand increases. This is injected into the global $A$ matrix and $b$ vector before training and verification.
 
----
-
-## 3. Formal Verification Pipeline
-
-This project goes beyond simple testing by using **Mixed-Integer Linear Programming (MILP)** to formally verify the model's behavior against its physical constraints. In the configuration file, you can choose whether you would like to check for constraint violations (check = constraint), or the worst-case suboptimality (check = distance).
-
-### 🛡️ Feasibility Verification
-We search the entire continuous input space to find the "Worst Case" input $x_{in}$ that causes the Neural Network to violate the system constraints ($Ax \le b$).
-
-### 📉 Distance to Optimal Analysis
-We calculate the **Proven Worst-Case Sub-Optimality**. This uses **KKT (Karush-Kuhn-Tucker) Conditions** to find the maximum possible gap between the cost of the NN's prediction and the true mathematical optimal solution.
-
 
 
 ---
 
-## 4. Project Structure & Workflow
+## 3. Project Structure & Workflow
 
 1.  **`generate_data.py`**: Creates the $A$, $b$, and $c$ matrices. It solves the LP for thousands of random input scenarios to create a training dataset.
 2.  **`train_nn.py`**: A PyTorch implementation of a Feedforward ReLU network. It maps inputs to outputs using the generated data.
@@ -60,7 +48,7 @@ We calculate the **Proven Worst-Case Sub-Optimality**. This uses **KKT (Karush-K
 
 ---
 
-## 5. Quick Start
+## 4. Quick Start
 
 ```bash
 # 1. Generate the LP physics and data

@@ -276,6 +276,7 @@ class OBBTComputer(BoundComputer):
             return ia_bounds[l_idx][n_idx]
         
         tight_u = aml.value(model.obj)
+
         
         return tight_l, tight_u
 
@@ -394,7 +395,7 @@ class VerificationTask(ABC):
         """Template method for verification."""
         # Step 1: Compute bounds
         bounds = self._compute_bounds(layers, input_bounds)
-        
+
         # Step 2: Build base model
         model = self.model_builder.build(layers, input_bounds, bounds, self.config)
         model._spec_ref = kwargs.get('spec')
@@ -431,7 +432,7 @@ class VerificationTask(ABC):
         opt = SolverFactory(self.config.solver_name)
         results = opt.solve(model, tee=self.config.verbose, 
                           options=self.config.solver_options)
-        
+
         if results.solver.termination_condition != TerminationCondition.optimal:
             return {"status": str(results.solver.termination_condition)}
         
@@ -713,6 +714,8 @@ class OptimalityGapVerificationTask(VerificationTask):
         out_layer_idx = len(layers) - 1
         for i, g_idx in enumerate(out_idx):
             model.nn_cons.add(model.x_nn_full[g_idx] == model.y[out_layer_idx, i])
+            
+        
 
     def _set_objective(self, model, layers, **kwargs):
         spec = kwargs['spec']
@@ -723,15 +726,24 @@ class OptimalityGapVerificationTask(VerificationTask):
         model.obj = aml.Objective(expr=nn_cost - true_cost, sense=aml.maximize)
     
     def _parse_solution(self, model, layers):
-        out_layer_idx = len(layers) - 1
         
-        # Retrieve the parked metadata
+        out_layer_idx = len(layers) - 1
         c = model._objective_c
         out_idx_list = model._output_indices
-
-        # Calculate costs
-        nn_total_cost = sum(c[i] * aml.value(model.x_nn_full[i]) for i in range(len(c)))
-        optimal_total_cost = sum(c[i] * aml.value(model.x_star[i]) for i in range(len(c)))
+        
+        # 2. Use the range of the actual variable set
+        n_vars = len(c) 
+        
+        # Use a safer summation
+        nn_total_cost = 0.0
+        optimal_total_cost = 0.0
+        
+        for i in range(n_vars):
+            val_nn = aml.value(model.x_nn_full[i])
+            val_star = aml.value(model.x_star[i])
+            
+            nn_total_cost += c[i] * val_nn
+            optimal_total_cost += c[i] * val_star
 
         # Construct the result dictionary
         result = {

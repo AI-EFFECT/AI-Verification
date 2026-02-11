@@ -55,10 +55,3 @@ The behavior of the toolbox is governed by the `model_meta` section in your `con
 
 ---
 
-### 🚀 Logic Flow
-Based on these settings, the `main.py` entry point follows this decision logic:
-
-1. **Routing:** Uses `pclass` and `ptype` to find the correct `runner` in the `USECASE_ROUTER`.
-2. **Task Definition:** Uses `check` to determine whether to build a **Feasibility** MILP (violation search) or a **Regret** MILP (distance search).
-3. **Execution:** Solves the verification problem.
-4. **Reporting:** If `report` is `yes`, it triggers the `report_gen` utility using the mode-specific template.

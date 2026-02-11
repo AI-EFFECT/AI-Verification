@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 
 from verify.utils.loader import NNLoader
+from verify.utils.opt_loader import OptimizationLoader
 from usecase import USECASE_ROUTER
 from output.utils.report_gen import generate_report
 
@@ -17,6 +18,14 @@ for name in logging.root.manager.loggerDict:
 
 # Also set the root logger higher if something is still leaking through
 logging.getLogger().setLevel(logging.WARNING)
+
+"""
+python main.py usecase/optimization/lp/config.yaml
+
+to do:
+- now you fill in a optimization model. The extractor in opt_loader should concert into A, b and c matrices, and fill in in config what type of optimization it is
+- modify all code so it reads the optmizaiton model and fills in the config, or passes this data to loader.
+"""
 
 # --- HELPERS ---
 
@@ -45,6 +54,7 @@ def main():
     args = parser.parse_args()
 
     config_path = Path(args.config).resolve()
+    print(config_path)
     if not config_path.exists():
         print(f"[-] ERROR: Config file not found at {config_path}")
         sys.exit(1)
@@ -61,6 +71,8 @@ def main():
     # 3. Verification Execution
     try:
         # Initialize Data Loader
+        config_data = OptimizationLoader(config_data).enrich_config()
+        
         loader = NNLoader(config_data)
         model_name = loader.meta.get('name', 'Unnamed_Model')
 

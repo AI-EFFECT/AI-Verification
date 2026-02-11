@@ -1,62 +1,97 @@
 # 📄 Configuration & Model Metadata
 
-The `config.yaml` file is the **Single Source of Truth** for the verification engine. It bridges the gap between the Machine Learning model (weights/biases) and the Mathematical Optimization problem (constraints/objectives) and it specifies the verification objective.
+To utilize the verification toolbox, follow this three-step workflow:
+
+1.  **Define Physics:** Write the underlying optimization problem in Pyomo and store it in the `models/` folder.
+2.  **Save Weights:** Store your trained Neural Network as a `.pt` file in the `models/` folder.
+3.  **Configure Engine:** Fill in the remaining verification configuration parameters in `config.yaml`.
+
+The `config.yaml` file is the **Single Source of Truth** for the verification engine. It bridges the gap between the Machine Learning model (weights/biases) and the Mathematical Optimization problem (constraints/objectives).
 
 ---
 
-## 1. Problem Class: Linear Programming (LP)
+## 1. Underlying Optimization
 
-It is important to note that the current `verification_spec` is designed specifically for **Linear Programming (LP)** structures. 
+Currently, the toolbox supports **Linear Programming (LP)** proxies. Below is a template for an underlying LP structure.
 
-* **Why this matters:** Different optimization classes require different mathematical representations. For example, a **Quadratic Program (QP)** would require an additional Hessian matrix ($Q$) for the objective, while **Non-Linear Programs (NLP)** might require functional expressions.
-* **Standard Form:** The verifier assumes the physics follow the canonical LP form:
-  $$\min c^T x \quad \text{s.t.} \quad Ax \le b, \quad x \ge 0$$
+### Implementation Template (`models/lp_physics.py`)
 
+```python
+from pyomo.environ import *
+import numpy as np
+
+def create_model():
+    '''
+    ZONE 1: Define your optimization model.
+    Users should define their Variables and Constants here.
+    '''
+    model = ConcreteModel()
+    
+    # Define which indices correspond to your Neural Network
+    input_idxs = [0, 1]      # Features the NN receives
+    output_idxs = [2, 3, 4, 5] # Decisions the NN predicts
+    
+    # --- VARIABLE DEFINITION ---
+    # Define the bounds of your input space (the search space for the verifier)
+    model.x_in = Var(input_idxs, bounds=(0, 5), initialize=0)
+    
+    # Define the bounds of the NN outputs
+    model.x_out = Var(output_idxs, domain=NonNegativeReals, bounds=(0, 10))
+    
+    # --- PHYSICAL CONSTRAINTS ---
+    model.cons = ConstraintList()
+    
+    # Example: Physical bounds or resource limits
+    # Users can write these as natural algebraic expressions!
+    np.random.seed(42) 
+    A_out = np.random.uniform(-1, 1, size=(4, 4))
+    b_raw = np.random.uniform(5, 10, size=4)
+    
+    for i in range(4):
+        expr = sum(A_out[i, j] * model.x_out[idx] for j, idx in enumerate(output_idxs))
+        model.cons.add(expr <= b_raw[i])
+
+    # ZONE 2: Global Coupling Constraints
+    # This is where users define how inputs and outputs relate (e.g., Mass Balance)
+    balance_expr = sum(model.x_in[i] for i in input_idxs) - \
+                   sum(model.x_out[j] for j in output_idxs)
+    model.cons.add(balance_expr <= 0)
+
+    # ZONE 3: The Objective
+    # This defines what "Good" looks like (used to calculate Regret/Optimality Gap)
+    model.obj = Objective(expr=sum(model.x_out[j] for j in output_idxs), sense=minimize)
+    
+    return model
+
+def get_io_mapping(model):
+    '''
+    CRITICAL: Map your Pyomo variables back to the Neural Network vector.
+    The order here MUST match the order of your NN's input and output layers.
+    '''
+    inputs = [model.x_in[i] for i in [0, 1]]
+    outputs = [model.x_out[j] for j in [2, 3, 4, 5]]
+    return inputs, outputs
+```
+
+## 2. Trained Neural Network
+
+If you trained a neural network using Pytorch, simply upload the .pt model to the models/ folder. If you used any other packages (TensorFlow, Keras, Jax), ensure you convert the model to a PyTorch state dictionary or TorchScript format before verification.
 
 
 ---
 
-## 2. Model Metadata (`model_meta`)
+## 3. Model Metadata (`model_meta`)
 
 This section defines the identity and architecture of the neural network.
-* **`pclass`**: Specifies the problem class, currently set to `optimization`. Other choices are for example control, or forecast.
+* **`pclass`**: Specifies the problem class, currently set to `optimization`. Other choices are for example control, or forecast, but are not yet implemented.
 * **`ptype`**: Specifies the type of problem. Currently set to `lp` (linear program). Other options are `qp` (quadratic program).
 * **`architecture`**: Currently set to `feedforward`. this specifies the neural network architecture. 
 * **`activation`**: Set to `relu`. This tells the verifier to use **Big-M** or **Indicator Constraints** to linearize the non-linear activation functions for the MILP solver.
 * **`check`**: Specifies whether you want to check worst-case constraint violations, or the worst-case distance (`distance`) to the optimal solution. Currently set to `constraint`.
+* **`report`**: Specifies whether you want to generate a jupyter notebook as an output report.
+* **`engine`**: Specifies whether you want to use the exact `milp` reformulation of the neural network to get exact certificates at the cost of increased computational time, or if you want to use `crown` to get a fast approximation
+* **`solver`**: If you decide to use the exact `milp` reformulation of the neural network, you can specify which solver you would like to use to solve the optimization.
 
-
----
-
-## 3. Verification Specification (`verification_spec`)
-
-This section defines the "Rules of the Game" that the Neural Network must follow.
-
-### A. Input Space & Indices
-* **`input_bounds`**: Defines the valid search space (e.g., $0$ to $5$) for the input variables. The verifier looks for violations **only** within this range.
-* **`input_indices`**: The indices in the state vector $x$ that represent independent parameters (e.g., Demand/Load).
-* **`output_indices`**: The indices predicted by the NN (e.g., Generator Dispatch).
-
-### B. Physical Constraints (Matrix $A$ and Vector $b$)
-These define the boundaries of the feasible region.
-* **Matrix A**: Each row is a linear inequality. 
-* **The Balance Constraint**: The final row in your $A$ matrix (`[1, 1, -1, -1, -1, -1]`) represents the physical law of supply and demand: 
-  $$\sum \text{Inputs} - \sum \text{Outputs} \le 0 \implies \sum \text{Outputs} \ge \sum \text{Inputs}$$
-* **`b_static`**: The right-hand side limits for the inequalities.
-
-### C. Objective Coefficients (`objective_c`)
-The "Cost" of each variable. In this LP proxy:
-* **Input costs** are `0.0` (we don't pay for the demand itself).
-* **Output costs** are positive (we pay for the generation used to satisfy the demand).
-
-
-
----
-
-## 4. Usage in the Pipeline
-
-1. **The Trainer** uses this file to understand the architecture it needs to build.
-2. **The Verifier** uses the `layers` to build the NN inside the optimization model and the `verification_spec` to build the "True Optimal" baseline using KKT conditions.
 
 <details>
 <summary>🔍 Click to view a sample Config structure</summary>
@@ -68,13 +103,21 @@ model_meta:
   ptype: lp
   architecture: feedforward
   activation: relu
-  check: distance
-layers:
-  - weights: [[...]]
-    biases: [...]
-verification_spec:
-  input_bounds: [{min: 0, max: 5}, {min: 0, max: 5}]
-  constraints:
-    A: [[...]]
-    b_static: [...]
-  objective_c: [0.0, 0.0, 0.5, 0.2, 0.9, 0.3]
+  check: constraint
+  report: 'no'
+  solver: gurobi
+  engine: crown
+proxy_spec:
+  nn_path: models/lp_example.pt
+  opt_path: models/lp_physics.py
+```
+
+---
+
+## 4. Usage in the Pipeline
+
+Once you uploaded your optimization model and your trained neural network, simply run:
+
+```bash
+python main.py config.yaml
+```
