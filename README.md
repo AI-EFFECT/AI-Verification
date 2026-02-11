@@ -1,6 +1,6 @@
 # 🛡️ Neural Network Verification Toolbox
 
-Neural Networks are powerful surrogates but remain "black boxes" that cannot guarantee physical feasibility. In critical systems (like Power Grids or Battery Management), a 1% error isn't just noise—it's a system failure. This toolbox provides the formal proof that your NN will behave, even in the worst-case scenarios.
+Neural Networks are powerful surrogates but remain "black boxes" that cannot guarantee physical feasibility. In safety critical systems like power systems, a 1% error isn't just noise—it can be a system failure. This toolbox provides the formal proof that your NN will behave across the entire input domain, even in the worst-case scenarios.
 
 ---
 
