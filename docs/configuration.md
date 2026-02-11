@@ -113,7 +113,7 @@ proxy_spec:
   opt_path: models/lp_physics.py
 ```
 </details>
----
+
 
 ## 4. Usage in the Pipeline
 
