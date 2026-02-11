@@ -10,7 +10,7 @@ The `config.yaml` file is the **Single Source of Truth** for the verification en
 
 ---
 
-## 1. Underlying Optimization
+## 1. Define Physics: Underlying Optimization
 
 Currently, the toolbox supports **Linear Programming (LP)** proxies. Below is a template for an underlying LP structure.
 
@@ -35,7 +35,7 @@ def create_model():
     # Define the bounds of your input space (the search space for the verifier)
     model.x_in = Var(input_idxs, bounds=(0, 5), initialize=0)
     
-    # Define the bounds of the NN outputs
+    # Define the NN outputs
     model.x_out = Var(output_idxs, domain=NonNegativeReals, bounds=(0, 10))
     
     # --- PHYSICAL CONSTRAINTS ---
@@ -52,7 +52,7 @@ def create_model():
         model.cons.add(expr <= b_raw[i])
 
     # ZONE 2: Global Coupling Constraints
-    # This is where users define how inputs and outputs relate (e.g., Mass Balance)
+    # This is where users define how inputs and outputs relate (e.g., Power Balance)
     balance_expr = sum(model.x_in[i] for i in input_idxs) - \
                    sum(model.x_out[j] for j in output_idxs)
     model.cons.add(balance_expr <= 0)
@@ -73,14 +73,14 @@ def get_io_mapping(model):
     return inputs, outputs
 ```
 
-## 2. Trained Neural Network
+## 2. Save Weights: Trained Neural Network
 
 If you trained a neural network using Pytorch, simply upload the .pt model to the models/ folder. If you used any other packages (TensorFlow, Keras, Jax), ensure you convert the model to a PyTorch state dictionary or TorchScript format before verification.
 
 
 ---
 
-## 3. Model Metadata (`model_meta`)
+## 3. Configure Engine: Model Metadata (`model_meta`)
 
 This section defines the identity and architecture of the neural network.
 * **`pclass`**: Specifies the problem class, currently set to `optimization`. Other choices are for example control, or forecast, but are not yet implemented.
@@ -88,10 +88,11 @@ This section defines the identity and architecture of the neural network.
 * **`architecture`**: Currently set to `feedforward`. this specifies the neural network architecture. 
 * **`activation`**: Set to `relu`. This tells the verifier to use **Big-M** or **Indicator Constraints** to linearize the non-linear activation functions for the MILP solver.
 * **`check`**: Specifies whether you want to check worst-case constraint violations, or the worst-case distance (`distance`) to the optimal solution. Currently set to `constraint`.
-* **`report`**: Specifies whether you want to generate a jupyter notebook as an output report.
+* **`report`**: Specifies whether you want to generate a jupyter notebook as an output report. This report is stored under the /output folder.
 * **`engine`**: Specifies whether you want to use the exact `milp` reformulation of the neural network to get exact certificates at the cost of increased computational time, or if you want to use `crown` to get a fast approximation
 * **`solver`**: If you decide to use the exact `milp` reformulation of the neural network, you can specify which solver you would like to use to solve the optimization.
 
+---
 
 <details>
 <summary>🔍 Click to view a sample Config structure</summary>
@@ -111,7 +112,7 @@ proxy_spec:
   nn_path: models/lp_example.pt
   opt_path: models/lp_physics.py
 ```
-
+</details>
 ---
 
 ## 4. Usage in the Pipeline
