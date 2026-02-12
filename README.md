@@ -36,6 +36,8 @@ This toolbox automates the generation of a formal audit report by identifying th
 > [!NOTE]
 > All results are derived from a **Snapshot Inference**: the verifier identifies the single worst-case point in the continuous input space and reports the system state at that specific failure.
 
+> [!TIP]
+> **Automated Auditing:** Set `report: yes` in `config.yaml` to generate a timestamped, interactive **Jupyter Notebook** in the `/output` folder for every run. 
 
 ## ⚙️ Core Engines
 
@@ -43,7 +45,7 @@ The toolbox features a dual-engine architecture, allowing users to balance the t
 
 * **Exact Verification (MILP):** Transforms the Neural Network into a Mixed-Integer Linear Programming (MILP) formulation. It leverages high-performance solvers like **Gurobi** to provide a definitive, mathematical certificate. If a property is violated, it returns the exact **counter-example** (the specific input that broke the system). Supports both the `constraint` and `distance` check.
     
-* **Bound-Based Verification (CROWN):** Utilizes a state-of-the-art linear relaxation framework (**CROWN**) to propagate efficient symbolic bounds through the network. This provides a formal guarantee (lower/upper bounds) in a fraction of the time required for MILP. It is the preferred choice for large-scale architectures or rapid iterative testing where approximate certificates are sufficient. Only supports the `constraint` check.
+* **Bound-Based Verification (CROWN):** Utilizes a state-of-the-art linear relaxation framework (CROWN) to propagate efficient symbolic bounds through the network. This provides a formal guarantee (lower/upper bounds) in a fraction of the time required for MILP. It is the preferred choice for large-scale architectures or rapid iterative testing where approximate certificates are sufficient. Only supports the `constraint` check.
 
 
 ## 📖 Documentation
@@ -52,19 +54,6 @@ For detailed guides and tutorials, refer to our documentation suite:
 
 * **[Tutorial: Running an LP Example](./docs/tutorials/lp_proxy.md):** A comprehensive, step-by-step guide covering data generation, surrogate training, and executing your first verification.
 * **[Configuration Guide](./docs/configuration.md):** A complete breakdown of all `config.yaml` parameters, from solver selection to engine-specific settings.
-
----
-
-## 📊 Automated Reporting
-
-Every time the engine runs, and you set `report: yes` in the `config.yaml`, it generates a timestamped, interactive **Jupyter Notebook report** stored in the `/output` folder. This provides a transparent audit trail of the model's performance.
-
-**Each report includes:**
-* **Violation Analytics:** Magnitude and frequency of worst-case constraint violations.
-* **Optimality Gap:** Statistical distribution of the sub-optimality distance from the true mathematical optimum.
-* **Counter-Example Visualizations:** High-resolution plots of the specific input scenarios that caused the Neural Network to fail, allowing for targeted model retraining.
-
-**[Output Report Example](./output/report_constraint_20260212_111118.ipynb):** An output report example if you run a constraint verification.
 
 ---
 
@@ -85,3 +74,8 @@ Every time the engine runs, and you set `report: yes` in the `config.yaml`, it g
 
 
 
+---
+
+## 📚 References & Acknowledgments
+
+This toolbox utilizes the [auto_LiRPA](https://github.com/Verified-Intelligence/auto_LiRPA) library for robust neural network bounding and formal verification.
