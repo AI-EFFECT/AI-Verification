@@ -47,7 +47,7 @@ If `report` is set to `yes`, this toolbox automates the generation of a formal a
 
 | Feature | **Safety Analysis** (`constraint`) | **Optimality Analysis** (`distance`) |
 | :--- | :--- | :--- |
-| **Focus** | Physical Feasibility | Sub-Optimality / Regret |
+| **Focus** | Physical Feasibility | Sub-Optimality |
 | **The Question** | Does the NN break physical laws? | How much "money" is left on the table? |
 | **Metric** | Max Violation (e.g., $10^{-6}$) | Sub-Optimality Gap ($Cost_{NN} - Cost_{Opt}$) |
 | **Example** | [View Constraint Report](./output/report_constraint_20260212_144036.ipynb) | [View Distance Report](./output/report_distance_20260212_144050.ipynb) |
