@@ -4,12 +4,25 @@ Neural Networks are powerful surrogates but remain "black boxes" that cannot gua
 
 ---
 
+## ⚡ Quickstart
+
+Getting from a physical problem to a verified certificate is a streamlined three-step process. This toolbox automates the integration between the Pyomo optimization environment and the PyTorch learning framework.
+
+1. **Define Physics:** Model your system's physical constraints and objectives using **Pyomo**. Once you have written the optimization in a `.py` file, store it in the `models/` folder. This model serves as the ground-truth for the verifier. Find an example for a Linear Programming Optimization probleme here: [models/lp_physics.py](./models/lp_physics.py).
+2. **Trained Surrogate:** Upload your trained Neural Network model which serves as a surrogate model to your optimization problem. Currently, the toolbox only accepts Neural Networks trained in **PyTorch**. Save the trained weights as a `.pt` file in the `models/` folder.
+3. **Formal Verification:** Configure your verification settings in `config.yaml` and run the entrypoint:
+
+```bash
+python main.py config.yaml
+```
+
+---
+
 ## 🚀 Overview
 This service allows users to verify Neural Network predictions against physical constraints or optimal solutions. It supports two primary verification modes:
 
 * **Sub-Optimality Analysis (`check: distance`):** Measures the "Optimality Gap"—how far a NN prediction is from the mathematically certain "True Optimal" solution.
 * **Safety Analysis (`check: constraint`):** Identifies "Worst-Case Violations"—searching for the specific input that forces the NN to break physical boundaries (e.g., thermal limits, power balance).
-
 
 
 ## ⚙️ Core Engines
@@ -20,20 +33,6 @@ The toolbox features a dual-engine architecture, allowing users to balance the t
     
 * **Bound-Based Verification (CROWN):** Utilizes a state-of-the-art linear relaxation framework (**CROWN**) to propagate efficient symbolic bounds through the network. This provides a formal guarantee (lower/upper bounds) in a fraction of the time required for MILP. It is the preferred choice for large-scale architectures or rapid iterative testing where approximate certificates are sufficient.
 
----
-
-## ⚡ Workflow at a Glance
-
-Getting from a physical problem to a verified certificate is a streamlined three-step process. This toolbox automates the integration between the Pyomo optimization environment and the PyTorch learning framework.
-
-
-1. **Define Physics:** Model your system's physical constraints and objectives using **Pyomo**. This logic is stored in `models/lp_physics.py` and serves as the ground-truth for the verifier.
-2. **Train Surrogate:** Generate a dataset from your optimization model and train a **PyTorch** Neural Network. Save the trained weights as a `.pt` file in the `models/` folder.
-3. **Formal Verification:** Configure your engine settings in `config.yaml` and run the entrypoint:
-
-```bash
-python main.py config.yaml
-```
 
 ## 📖 Documentation
 
