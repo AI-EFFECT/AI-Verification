@@ -9,8 +9,7 @@ Neural Networks are powerful surrogates but remain "black boxes" that cannot gua
 Bridge the gap between **PyTorch** and **Pyomo** in minutes. This toolbox automates the generation of a formal safety certificate for your neural network surrogates.
 
 ### 1. Define Your Physics
-Model your system's constraints and objectives using standard **Pyomo** syntax. Save this as a `.py` file in the `models/` folder. This acts as the "Ground Truth" for the verifier.
-* *See a Linear Programming example:* [`lp_physics.py`](./models/lp_physics.py)
+Model your system's constraints and objectives using standard **Pyomo** syntax. Save this as a `.py` file in the `models/` folder. This acts as the "Ground Truth" for the verifier. *See a Linear Programming example:* [`lp_physics.py`](./models/lp_physics.py)
 
 ### 2. Connect Your Surrogate
 Provide your trained Neural Network weights (currently supporting **PyTorch** `.pt` files). Place your model in the `models/` folder alongside your physics definition.
