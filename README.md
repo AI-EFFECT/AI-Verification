@@ -15,8 +15,8 @@ Model your system's constraints and objectives using standard **Pyomo** syntax. 
 ### 2. Connect Your Surrogate
 Provide your trained Neural Network weights (currently supporting **PyTorch** `.pt` files). Place your model in the `models/` folder alongside your physics definition.
 
-### 3. 🛡️ Formally Verify
-Define your model paths and verification parameters in `config.yaml`, then trigger the MILP-based verification engine:
+### 3. Formally Verify
+Define your verification parameters in `config.yaml`, then trigger the verification toolbox:
 
 <details>
 <summary>🔍 Click to view sample Config structure</summary>
@@ -29,7 +29,7 @@ model_meta:
   architecture: feedforward
   activation:   relu
   check:        constraint    # 'constraint' (safety) or 'distance' (optimality)
-  report:       yes           # Auto-generate Jupyter audit
+  report:       yes           # Generates an interactive Jupyter audit of the worst-case failure in /output
   solver:       gurobi        # MILP solver
   engine:       milp          # MILP or CROWN engine
 proxy_spec:
@@ -44,7 +44,7 @@ python main.py config.yaml
 
 ## 📊 Verification Modes
 
-This toolbox automates the generation of a formal audit report by identifying the **global maximum violation**—the exact point where your surrogate model will fail.
+If `report` is set to `yes`, this toolbox automates the generation of a formal audit report by identifying the **global maximum violation**—the exact point where your surrogate model will fail.
 
 | Feature | **Safety Analysis** (`constraint`) | **Optimality Analysis** (`distance`) |
 | :--- | :--- | :--- |
@@ -56,8 +56,6 @@ This toolbox automates the generation of a formal audit report by identifying th
 > [!NOTE]
 > All results are derived from a **Snapshot Inference**: the verifier identifies the single worst-case point in the continuous input space and reports the system state at that specific failure.
 
-> [!TIP]
-> **Automated Auditing:** Set `report: yes` in `config.yaml` to generate a timestamped, interactive **Jupyter Notebook** in the `/output` folder for every run. 
 
 ## ⚙️ Core Engines
 
