@@ -41,6 +41,7 @@ For detailed guides and tutorials, refer to our documentation suite:
 
 * **[Tutorial: Running an LP Example](./docs/tutorials/lp_proxy.md):** A comprehensive, step-by-step guide covering data generation, surrogate training, and executing your first verification.
 * **[Configuration Guide](./docs/configuration.md):** A complete breakdown of all `config.yaml` parameters, from solver selection to engine-specific settings.
+* **[Output Report Example](./output/report_constraint_20260212_111118.ipynb):** An output report example if you run a constraint verification.
 
 ---
 
