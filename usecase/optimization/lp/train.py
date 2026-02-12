@@ -50,7 +50,7 @@ def export_to_yaml(model, meta, config_path, model_filename):
         "ptype": "lp",
         "architecture": "feedforward",
         "activation": "relu",
-        "check": "distance",
+        "check": "constraint",
         "report": "no",
         "solver": "gurobi",
         "engine": "milp"
@@ -103,7 +103,7 @@ def main():
     criterion = nn.MSELoss()
 
     print(f"[*] Training NN Surrogate...")
-    for epoch in range(1001): 
+    for epoch in range(2001): 
         optimizer.zero_grad()
         loss = criterion(model(X), Y)
         loss.backward()

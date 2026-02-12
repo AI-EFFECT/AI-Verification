@@ -645,11 +645,13 @@ class FeasibilityVerificationTask(VerificationTask):
         # Calculate violations (Ax - b)
         violations = [float(sum(A[j][i] * full_x[i] for i in range(len(full_x))) - b[j]) for j in range(len(b))]
         max_violation = float(max(violations))
+        worst_row_idx = int(np.argmax(violations))
 
         # Construct the dictionary with EVERY key the system might look for
         result = {
             "status": "Success",
             "max_violation": max_violation,
+            "worst_row_idx": worst_row_idx,
             "optimality_gap": max_violation, # Aliasing for compatibility
             "true_optimal_cost": 0.0,         # Placeholder for constraint checks
             "violation_per_row": violations,

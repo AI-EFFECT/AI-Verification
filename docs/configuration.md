@@ -35,7 +35,7 @@ def create_model():
     # Define the bounds of your input space (the search space for the verifier)
     model.x_in = Var(input_idxs, bounds=(0, 5), initialize=0)
     
-    # Define the NN outputs
+    # Define the bounds of the NN outputs
     model.x_out = Var(output_idxs, domain=NonNegativeReals, bounds=(0, 10))
     
     # --- PHYSICAL CONSTRAINTS ---
@@ -47,15 +47,25 @@ def create_model():
     A_out = np.random.uniform(-1, 1, size=(4, 4))
     b_raw = np.random.uniform(5, 10, size=4)
     
+    # 1. Standard Upper Bound
     for i in range(4):
         expr = sum(A_out[i, j] * model.x_out[idx] for j, idx in enumerate(output_idxs))
         model.cons.add(expr <= b_raw[i])
+        
+    # 2. Lower Bound Constraint: Ensure at least some minimum activity
+    # Example: sum of first two outputs must be >= 2.0
+    model.cons.add(model.x_out[2] + model.x_out[3] >= 2.0)
+
+    # 3. Range Constraint: Keep the last output within a specific window
+    # Example: 1.0 <= x_out[5] <= 4.0
+    model.cons.add((1.0, model.x_out[5], 4.0))
 
     # ZONE 2: Global Coupling Constraints
-    # This is where users define how inputs and outputs relate (e.g., Power Balance)
+    # This is where users define how inputs and outputs relate (e.g., Mass Balance)
     balance_expr = sum(model.x_in[i] for i in input_idxs) - \
                    sum(model.x_out[j] for j in output_idxs)
-    model.cons.add(balance_expr <= 0)
+    #model.cons.add(balance_expr <= 0)
+    model.cons.add(balance_expr == 0)
 
     # ZONE 3: The Objective
     # This defines what "Good" looks like (used to calculate Regret/Optimality Gap)

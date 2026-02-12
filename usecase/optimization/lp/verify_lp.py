@@ -14,6 +14,8 @@ def run_lp_verification(loader):
     check_type = loader.meta.get('check', 'constraint')
     solver_type = loader.meta.get('solver', 'gurobi')
     engine_type = loader.meta.get('engine', 'milp')
+    A = spec.constraints_A
+    cons_names = loader.spec_raw.get('constraints', {}).get('names') or [f"Row {i}" for i in range(len(A))]
 
     print(f"\n--- Verifying LP Surrogate: {model_name} ---")
     print(f"Check Type: {check_type.upper()}")
@@ -43,7 +45,7 @@ def run_lp_verification(loader):
         result['runtime_sec'] = end_time - start_time
 
         if result['status'] == "Success":
-            _print_feasibility_report(spec, result)
+            _print_feasibility_report(spec, result, cons_names)
         else:
             print(f"Solver Error: {result['status']}")
 
@@ -70,7 +72,7 @@ def run_lp_verification(loader):
 
 # --- Helper functions to keep the main logic clean ---
 
-def _print_feasibility_report(spec, result):
+def _print_feasibility_report(spec, result, cons_names):
     x_full = np.array(result['full_x_vector'])
     A = spec.constraints_A
     b = spec.b_static
@@ -80,6 +82,7 @@ def _print_feasibility_report(spec, result):
     engine = result.get('engine', 'MILP').upper()
     max_viol = result.get('max_violation', 0.0)
     runtime = result.get('runtime_sec', 0.0)
+    worst_idx = result.get('worst_row_idx')
     
     # Define a safety threshold (handling floating point noise)
     is_safe = max_viol <= 1e-7 
@@ -111,6 +114,7 @@ def _print_feasibility_report(spec, result):
     # --- STANDARD MILP TABLES (Only reached if engine != CROWN) ---
     x_full = np.array(result['full_x_vector'])
     in_idx, out_idx = spec.input_indices, spec.output_indices
+    names = cons_names
     
     print(f"{'COMPONENT ANALYSIS':<20} | {'INDICES':<15} | {'VALUES'}")
     print(f"{'-'*80}")
@@ -126,16 +130,22 @@ def _print_feasibility_report(spec, result):
     
     print(f"\n{'CONSTRAINT CHECK':<80}")
     print(f"{'-'*80}")
-    print(f"{'Row':<5} | {'LHS (Σ A_ij * x_j)':<20} | {'RHS (b)':<12} | {'Violation':<12}")
+    print(f"{'Row':<5} | {'Constraint Name':<25} | {'LHS':<15} | {'RHS (b)':<12} | {'Violation':<12}")
     print(f"{'-'*80}")
 
     for i in range(len(A)):
         lhs_val = np.dot(A[i], x_full)
         violation = lhs_val - b[i]
-        status = "[FAILED]" if violation > 1e-5 else "[OK]"
+        # Logic for the tag
+        if violation > 1e-5:
+            # Check if this specific row is the absolute worst one
+            status = "[MAX VIOLATOR]" if i == worst_idx else "[FAILED]"
+        else:
+            status = "[OK]"
+        c_name = names[i] if i < len(names) else f"Row {i}"
         
         # Color the output if violation is high (optional, depends on terminal)
-        print(f"{i:<5} | {lhs_val:<20.6f} | {b[i]:<12.6f} | {violation:<12.6f} {status}")
+        print(f"{i:<5} | {c_name:<25} | {lhs_val:<15.6f} | {b[i]:<12.6f} | {violation:<12.8f} {status}")
         
         # Explain the calculation for the failing row
         if violation > 1e-5:

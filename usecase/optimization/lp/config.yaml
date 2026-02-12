@@ -4,10 +4,10 @@ model_meta:
   ptype: lp
   architecture: feedforward
   activation: relu
-  check: constraint
-  report: 'no'
+  check: distance
+  report: yes
   solver: gurobi
-  engine: crown
+  engine: milp
 proxy_spec:
   nn_path: models/lp_example.pt
   opt_path: models/lp_physics.py

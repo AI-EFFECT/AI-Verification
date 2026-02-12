@@ -55,22 +55,41 @@ class OptimizationLoader:
             high = value(v.ub) if v.ub is not None else 1.0
             extracted_bounds.append({"min": float(low), "max": float(high)})
         
-        # --- 1. Extract Constraints (A and b) ---
+        # --- 2. Extract Constraints (A and b) ---
         A = []
         b_static = []
+        constraint_names = []
         for c in self.pyomo_model.component_data_objects(Constraint):
+            # Get the base name (e.g., 'cons' or 'demand_balance')
+            base_name = c.name 
+            
             repn = generate_standard_repn(c.body)
             row = [0.0] * len(all_vars)
             for v, coef in zip(repn.linear_vars, repn.linear_coefs):
                 if id(v) in var_map:
                     row[var_map[id(v)]] = coef
             
-            if c.has_ub():
+            # --- Case 1: Equality (=) ---
+            if c.equality:
                 A.append(row)
-                b_static.append(float(value(c.upper) - repn.constant))
-            elif c.has_lb():
+                b_static.append(float(value(c.upper) - repn.constant) + 1e-6)
+                constraint_names.append(f"{base_name} (Eq UB)")
+                
                 A.append([-1 * val for val in row])
-                b_static.append(float(-value(c.lower) + repn.constant))
+                b_static.append(float(-value(c.lower) + repn.constant) + 1e-6)
+                constraint_names.append(f"{base_name} (Eq LB)")
+                
+            # --- Case 2: Inequalities (<=, >=, or Range) ---
+            else:
+                if c.has_ub(): # Is there an upper limit?
+                    A.append(row)
+                    b_static.append(float(value(c.upper) - repn.constant))
+                    constraint_names.append(f"{base_name} (InEq UB)")
+                
+                if c.has_lb(): # Is there a lower limit? (Using 'if' not 'elif')
+                    A.append([-1 * val for val in row])
+                    b_static.append(float(-value(c.lower) + repn.constant))
+                    constraint_names.append(f"{base_name} (InEq LB)")
 
         # --- Extract Objective (c vector) ---
         c_vector = [0.0] * len(all_vars)
@@ -101,6 +120,9 @@ class OptimizationLoader:
             'A': np.array(A).tolist(),
             'b_static': np.array(b_static).tolist()
         }
+        # Inject names into config
+        self.config['verification_spec']['constraints']['names'] = constraint_names
+        
         self.config['verification_spec']['objective_c'] = c_vector
         
         self.config['verification_spec']['indices'] = {

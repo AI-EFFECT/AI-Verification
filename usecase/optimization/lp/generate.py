@@ -52,15 +52,25 @@ def create_model():
     A_out = np.random.uniform(-1, 1, size=(4, 4))
     b_raw = np.random.uniform(5, 10, size=4)
     
+    # 1. Standard Upper Bound
     for i in range(4):
         expr = sum(A_out[i, j] * model.x_out[idx] for j, idx in enumerate(output_idxs))
         model.cons.add(expr <= b_raw[i])
+        
+    # 2. Lower Bound Constraint: Ensure at least some minimum activity
+    # Example: sum of first two outputs must be >= 2.0
+    model.cons.add(model.x_out[2] + model.x_out[3] >= 2.0)
+
+    # 3. Range Constraint: Keep the last output within a specific window
+    # Example: 1.0 <= x_out[5] <= 4.0
+    model.cons.add((1.0, model.x_out[5], 4.0))
 
     # ZONE 2: Global Coupling Constraints
     # This is where users define how inputs and outputs relate (e.g., Mass Balance)
     balance_expr = sum(model.x_in[i] for i in input_idxs) - \
                    sum(model.x_out[j] for j in output_idxs)
-    model.cons.add(balance_expr <= 0)
+    #model.cons.add(balance_expr <= 0)
+    model.cons.add(balance_expr == 0)
 
     # ZONE 3: The Objective
     # This defines what "Good" looks like (used to calculate Regret/Optimality Gap)
@@ -83,7 +93,7 @@ def get_io_mapping(model):
 
 from scipy.optimize import linprog
 
-def generate_data(n_samples=500):
+def generate_data(n_samples=5000):
     print("[*] Generating training data using Scipy Solver...")
     
     # 1. SETUP IDENTICAL PHYSICS (Matches Pyomo "baked" logic)
@@ -106,27 +116,47 @@ def generate_data(n_samples=500):
         # Sample inputs within the specified range [1, 5]
         x_in = np.random.uniform(1, 5, size=len(input_idxs))
         
-        # Balance Constraint: sum(x_in) <= sum(x_out)
-        # In linprog (Ax <= b) form: -sum(x_out) <= -sum(x_in)
-        A_balance = -np.ones((1, 4))
-        b_balance = -np.sum(x_in)
+        # --- EQUALITY ---
+        A_eq = np.ones((1, 4))
+        b_eq = np.sum(x_in)
         
-        # Combine all constraints for the solver
-        # A_out * x_out <= b_raw
-        # A_balance * x_out <= b_balance
-        A_combined = np.vstack([A_out, A_balance])
-        b_combined = np.concatenate([b_raw, [b_balance]])
+        # --- INEQUALITIES (The Stack) ---
+        ineq_A = [A_out] # Start with original upper bounds
+        ineq_b = [b_raw]
         
-        # Solve
+        # 1. Lower Bound: x_out[0] + x_out[1] >= 2.0  =>  -1*x_out[0] - 1*x_out[1] <= -2.0
+        # Note: res.x indices are 0-3 corresponding to output_idxs [2,3,4,5]
+        lb_row = np.zeros(4)
+        lb_row[0:2] = -1.0 
+        ineq_A.append(lb_row.reshape(1, 4))
+        ineq_b.append([-2.0])
+        
+        # 2. Range: 1.0 <= x_out[3] <= 4.0
+        # Upper part: x_out[3] <= 4.0
+        range_ub = np.zeros(4)
+        range_ub[3] = 1.0
+        ineq_A.append(range_ub.reshape(1, 4))
+        ineq_b.append([4.0])
+        
+        # Lower part: -x_out[3] <= -1.0
+        range_lb = np.zeros(4)
+        range_lb[3] = -1.0
+        ineq_A.append(range_lb.reshape(1, 4))
+        ineq_b.append([-1.0])
+        
+        # Stack everything
+        A_combined = np.vstack(ineq_A)
+        b_combined = np.concatenate(ineq_b)
+        
         res = linprog(c_output, A_ub=A_combined, b_ub=b_combined, 
-                      bounds=(0, 10), method='highs')
+                      A_eq=A_eq, b_eq=b_eq, bounds=(0, 10), method='highs')
         
         if res.success:
             # Row = [in_0, in_1, out_2, out_3, out_4, out_5]
             sample = np.concatenate([x_in, res.x])
             data.append(sample)
             feasible_count += 1
-            if feasible_count % 100 == 0:
+            if feasible_count % 1000 == 0:
                 print(f"    Generated {feasible_count}/{n_samples} samples...")
 
     # 3. SAVE OUTPUTS
