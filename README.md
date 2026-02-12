@@ -15,8 +15,28 @@ Model your system's constraints and objectives using standard **Pyomo** syntax. 
 ### 2. Connect Your Surrogate
 Provide your trained Neural Network weights (currently supporting **PyTorch** `.pt` files). Place your model in the `models/` folder alongside your physics definition.
 
-### 3. Formally Verify
-Adjust your search bounds and tolerance in `config.yaml`, then trigger the MILP-based verification engine:
+### 3. 🛡️ Formally Verify
+Define your model paths and verification parameters in `config.yaml`, then trigger the MILP-based verification engine:
+
+<details>
+<summary>🔍 Click to view sample Config structure</summary>
+
+```yaml
+model_meta:
+  name:         lp_proxy
+  pclass:       optimization
+  ptype:        lp
+  architecture: feedforward
+  activation:   relu
+  check:        constraint    # 'constraint' (safety) or 'distance' (optimality)
+  report:       yes           # Auto-generate Jupyter audit
+  solver:       gurobi        # MILP solver
+  engine:       milp          # MILP or CROWN engine
+proxy_spec:
+  nn_path:      models/lp_example.pt
+  opt_path:     models/lp_physics.py
+```
+</details>
 
 ```bash
 python main.py config.yaml
