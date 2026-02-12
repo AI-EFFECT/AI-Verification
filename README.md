@@ -8,50 +8,42 @@ Neural Networks are powerful surrogates but remain "black boxes" that cannot gua
 
 Bridge the gap between **PyTorch** and **Pyomo** in minutes. This toolbox automates the generation of a formal safety certificate for your neural network surrogates.
 
-### 1. 🏗️ Define Your Physics
+### 1. Define Your Physics
 Model your system's constraints and objectives using standard **Pyomo** syntax. Save this as a `.py` file in the `models/` folder. This acts as the "Ground Truth" for the verifier.
 * *See a Linear Programming example:* [`lp_physics.py`](./models/lp_physics.py)
 
-### 2. 🧠 Connect Your Surrogate
+### 2. Connect Your Surrogate
 Provide your trained Neural Network weights (currently supporting **PyTorch** `.pt` files). Place your model in the `models/` folder alongside your physics definition.
 
-### 3. 🛡️ Formally Verify
+### 3. Formally Verify
 Adjust your search bounds and tolerance in `config.yaml`, then trigger the MILP-based verification engine:
 
 ```bash
 python main.py config.yaml
 ```
 
-## 📊 Verification Outcomes
+## 📊 Verification Modes
 
-The toolbox produces a formal audit report, identifying the **global maximum violation**—the exact point where your surrogate model theoretically will fail.
+This toolbox automates the generation of a formal audit report by identifying the **global maximum violation**—the exact point where your surrogate model will fail.
 
-| Feature | **Constraint Check** | **Distance (Regret) Check** |
+| Feature | **Safety Analysis** (`constraint`) | **Optimality Analysis** (`distance`) |
 | :--- | :--- | :--- |
-| **Focus** | Physical Feasibility | Optimality |
-| **Goal** | Do we break physical laws? | How much "money" is left on the table? |
+| **Focus** | Physical Feasibility | Sub-Optimality / Regret |
+| **The Question** | Does the NN break physical laws? | How much "money" is left on the table? |
 | **Metric** | Max Violation (e.g., $10^{-6}$) | Sub-Optimality Gap ($Cost_{NN} - Cost_{Opt}$) |
 | **Example** | [View Constraint Report](./output/report_constraint_20260212_144036.ipynb) | [View Distance Report](./output/report_distance_20260212_144050.ipynb) |
 
 > [!NOTE]
-> The report provides a **Snapshot Inference** derived from the single worst-case point in the continuous input space.
-
----
-
-## 🚀 Overview
-This service allows users to verify Neural Network predictions against physical constraints or optimal solutions. It supports two primary verification modes:
-
-* **Sub-Optimality Analysis (`check: distance`):** Measures the "Optimality Gap"—how far a NN prediction is from the mathematically certain "True Optimal" solution.
-* **Safety Analysis (`check: constraint`):** Identifies "Worst-Case Violations"—searching for the specific input that forces the NN to break physical boundaries (e.g., thermal limits, power balance).
+> All results are derived from a **Snapshot Inference**: the verifier identifies the single worst-case point in the continuous input space and reports the system state at that specific failure.
 
 
 ## ⚙️ Core Engines
 
 The toolbox features a dual-engine architecture, allowing users to balance the trade-off between mathematical precision and computational speed.
 
-* **Exact Verification (MILP):** Transforms the Neural Network into a Mixed-Integer Linear Programming (MILP) formulation. It leverages high-performance solvers like **Gurobi** to provide a definitive, mathematical certificate. If a property is violated, it returns the exact **counter-example** (the specific input that broke the system).
+* **Exact Verification (MILP):** Transforms the Neural Network into a Mixed-Integer Linear Programming (MILP) formulation. It leverages high-performance solvers like **Gurobi** to provide a definitive, mathematical certificate. If a property is violated, it returns the exact **counter-example** (the specific input that broke the system). Supports both the `constraint` and `distance` check.
     
-* **Bound-Based Verification (CROWN):** Utilizes a state-of-the-art linear relaxation framework (**CROWN**) to propagate efficient symbolic bounds through the network. This provides a formal guarantee (lower/upper bounds) in a fraction of the time required for MILP. It is the preferred choice for large-scale architectures or rapid iterative testing where approximate certificates are sufficient.
+* **Bound-Based Verification (CROWN):** Utilizes a state-of-the-art linear relaxation framework (**CROWN**) to propagate efficient symbolic bounds through the network. This provides a formal guarantee (lower/upper bounds) in a fraction of the time required for MILP. It is the preferred choice for large-scale architectures or rapid iterative testing where approximate certificates are sufficient. Only supports the `constraint` check.
 
 
 ## 📖 Documentation
