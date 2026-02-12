@@ -6,17 +6,35 @@ Neural Networks are powerful surrogates but remain "black boxes" that cannot gua
 
 ## ⚡ Quickstart
 
-Getting from a physical problem to a verified certificate is a streamlined three-step process. This toolbox automates the integration between the Pyomo optimization environment and the PyTorch learning framework.
+Bridge the gap between **PyTorch** and **Pyomo** in minutes. This toolbox automates the generation of a formal safety certificate for your neural network surrogates.
 
-1. **Define Physics:** Model your system's physical constraints and objectives using **Pyomo**. Once you have written the optimization in a `.py` file, store it in the `models/` folder. This model serves as the ground-truth for the verifier. Find an example for a Linear Programming Optimization probleme [here](./models/lp_physics.py).
-2. **Trained Surrogate:** Upload your trained Neural Network model which serves as a surrogate model to your optimization problem. Currently, the toolbox only accepts Neural Networks trained in **PyTorch**. Save the trained weights as a `.pt` file in the `models/` folder.
-3. **Formal Verification:** Configure your verification settings in `config.yaml` and run the entrypoint:
+### 1. 🏗️ Define Your Physics
+Model your system's constraints and objectives using standard **Pyomo** syntax. Save this as a `.py` file in the `models/` folder. This acts as the "Ground Truth" for the verifier.
+* *See a Linear Programming example:* [`lp_physics.py`](./models/lp_physics.py)
+
+### 2. 🧠 Connect Your Surrogate
+Provide your trained Neural Network weights (currently supporting **PyTorch** `.pt` files). Place your model in the `models/` folder alongside your physics definition.
+
+### 3. 🛡️ Formally Verify
+Adjust your search bounds and tolerance in `config.yaml`, then trigger the MILP-based verification engine:
 
 ```bash
 python main.py config.yaml
 ```
 
-The toolbox produces a formal verification audit, providing a snapshot of the surrogate model's behavior at its most critical failure point. An example output report for a `constraint` check can be found [here](./output/report_constraint_20260212_111118.ipynb).
+## 📊 Verification Outcomes
+
+The toolbox produces a formal audit report, identifying the **global maximum violation**—the exact point where your surrogate model theoretically will fail.
+
+| Feature | **Constraint Check** | **Distance (Regret) Check** |
+| :--- | :--- | :--- |
+| **Focus** | Physical Feasibility | Optimality |
+| **Goal** | Do we break physical laws? | How much "money" is left on the table? |
+| **Metric** | Max Violation (e.g., $10^{-6}$) | Sub-Optimality Gap ($Cost_{NN} - Cost_{Opt}$) |
+| **Example** | [View Constraint Report](./output/report_constraint_20260212_144036.ipynb) | [View Distance Report](./output/report_distance_20260212_144050.ipynb) |
+
+> [!NOTE]
+> The report provides a **Snapshot Inference** derived from the single worst-case point in the continuous input space.
 
 ---
 
