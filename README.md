@@ -8,13 +8,15 @@ Neural Networks are powerful surrogates but remain "black boxes" that cannot gua
 
 Getting from a physical problem to a verified certificate is a streamlined three-step process. This toolbox automates the integration between the Pyomo optimization environment and the PyTorch learning framework.
 
-1. **Define Physics:** Model your system's physical constraints and objectives using **Pyomo**. Once you have written the optimization in a `.py` file, store it in the `models/` folder. This model serves as the ground-truth for the verifier. Find an example for a Linear Programming Optimization probleme here: [models/lp_physics.py](./models/lp_physics.py).
+1. **Define Physics:** Model your system's physical constraints and objectives using **Pyomo**. Once you have written the optimization in a `.py` file, store it in the `models/` folder. This model serves as the ground-truth for the verifier. Find an example for a Linear Programming Optimization probleme [here](./models/lp_physics.py).
 2. **Trained Surrogate:** Upload your trained Neural Network model which serves as a surrogate model to your optimization problem. Currently, the toolbox only accepts Neural Networks trained in **PyTorch**. Save the trained weights as a `.pt` file in the `models/` folder.
 3. **Formal Verification:** Configure your verification settings in `config.yaml` and run the entrypoint:
 
 ```bash
 python main.py config.yaml
 ```
+
+The toolbox produces a formal verification audit, providing a snapshot of the surrogate model's behavior at its most critical failure point. An example output report for a `constraint` check can be found [here](./output/report_constraint_20260212_111118.ipynb).
 
 ---
 
@@ -45,7 +47,7 @@ For detailed guides and tutorials, refer to our documentation suite:
 
 ## 📊 Automated Reporting
 
-Verification shouldn't be a "black box." Every time the engine runs, it generates a timestamped, interactive **Jupyter Notebook report** stored in the `/output` folder. This provides a transparent audit trail of the model's performance.
+Every time the engine runs, and you set `report: yes` in the `config.yaml`, it generates a timestamped, interactive **Jupyter Notebook report** stored in the `/output` folder. This provides a transparent audit trail of the model's performance.
 
 **Each report includes:**
 * **Violation Analytics:** Magnitude and frequency of worst-case constraint violations.

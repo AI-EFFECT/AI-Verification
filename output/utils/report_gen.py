@@ -47,16 +47,10 @@ def generate_report(results, config, output_path="output/"):
         )
     nb['cells'].append(nbf.v4.new_markdown_cell(methodology_md))
     
-    # --- 3. Metadata & Search Space ---
+    # --- 3. Metadata ---
     input_indices = v_spec.get('indices', {}).get('input_indices', [])
     output_indices = v_spec.get('indices', {}).get('output_indices', [])
     bounds_list = v_spec.get('input_bounds', []) 
-
-    metadata_md = "### 📑 Verification Search Space\n| Variable | Search Range | Type |\n| :--- | :--- | :--- |\n"
-    for i, idx in enumerate(input_indices):
-        b = bounds_list[i] if i < len(bounds_list) else {'min': '?', 'max': '?'}
-        metadata_md += f"| Input {idx} | `[{b.get('min')}, {b.get('max')}]` | Continuous |\n"
-    nb['cells'].append(nbf.v4.new_markdown_cell(metadata_md))
 
     # --- 4. High-Level Metrics & Status ---
     solve_time = results.get('runtime_sec', 0.0)
@@ -73,6 +67,7 @@ def generate_report(results, config, output_path="output/"):
 
         audit_md = (
             f"### 📊 Optimality Summary\n"
+            f"- **Check:** `{check_type}`\n"
             f"- **Status:** `{status}`\n"
             f"- **Proven Sub-optimality (Gap):** `{gap:.6f}`\n"
             f"- **NN System Cost:** `{nn_cost:.4f}` | **True Optimal Cost:** `{true_cost:.4f}`\n"
@@ -84,6 +79,7 @@ def generate_report(results, config, output_path="output/"):
         status = "✅ FEASIBLE" if max_viol < 1e-4 else "❌ VIOLATED"
         audit_md = (
             f"### ⏱️ Performance & Safety Result\n"
+            f"- **Check:** `{check_type}`\n"
             f"- **Status:** `{status}`\n"
             f"- **Max Violation Found:** `{max_viol:.6f}`\n"
             f"- **Solve Time:** `{solve_time:.4f}s`\n"
@@ -91,6 +87,13 @@ def generate_report(results, config, output_path="output/"):
             f"- **Solver:** `{solver_type}`"
         )
     nb['cells'].append(nbf.v4.new_markdown_cell(audit_md))
+    
+    # ---   Search Space ---
+    metadata_md = "### 📑 Verification Search Space\n| Variable | Search Range | Type |\n| :--- | :--- | :--- |\n"
+    for i, idx in enumerate(input_indices):
+        b = bounds_list[i] if i < len(bounds_list) else {'min': '?', 'max': '?'}
+        metadata_md += f"| Input {idx} | `[{b.get('min')}, {b.get('max')}]` | Continuous |\n"
+    nb['cells'].append(nbf.v4.new_markdown_cell(metadata_md))
 
     # --- 5. Variable Comparison (Distance Mode Only) ---
     if check_type == "distance":
