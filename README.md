@@ -41,7 +41,6 @@ For detailed guides and tutorials, refer to our documentation suite:
 
 * **[Tutorial: Running an LP Example](./docs/tutorials/lp_proxy.md):** A comprehensive, step-by-step guide covering data generation, surrogate training, and executing your first verification.
 * **[Configuration Guide](./docs/configuration.md):** A complete breakdown of all `config.yaml` parameters, from solver selection to engine-specific settings.
-* **[Output Report Example](./output/report_constraint_20260212_111118.ipynb):** An output report example if you run a constraint verification.
 
 ---
 
@@ -53,6 +52,8 @@ Verification shouldn't be a "black box." Every time the engine runs, it generate
 * **Violation Analytics:** Magnitude and frequency of worst-case constraint violations.
 * **Optimality Gap:** Statistical distribution of the sub-optimality distance from the true mathematical optimum.
 * **Counter-Example Visualizations:** High-resolution plots of the specific input scenarios that caused the Neural Network to fail, allowing for targeted model retraining.
+
+**[Output Report Example](./output/report_constraint_20260212_111118.ipynb):** An output report example if you run a constraint verification.
 
 ---
 

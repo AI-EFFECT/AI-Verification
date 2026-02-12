@@ -80,7 +80,7 @@ python usecase/optimization/lp/generate.py
 
 2.  **Save Weights:** Store your trained Neural Network as a `.pt` file in the `models/` folder.
 
-For step 2, we need to train a neural network surrogate to learn the solution to our optimization problem. By running the `train_nn.py` script, we train our surrogate model, and store the weights as a .pt file in the `models/` folder.
+For step 2, we need to train a neural network surrogate to learn the solution to our optimization problem. By running the `train.py` script, we train our surrogate model, and store the weights as a .pt file in the `models/` folder.
 
 ```bash
 # 2. Train the surrogate model
