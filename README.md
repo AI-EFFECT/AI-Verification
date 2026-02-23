@@ -3,6 +3,10 @@
 Neural Networks are powerful surrogates but remain "black boxes" that cannot guarantee physical feasibility. In safety critical systems like power systems, a 1% error isn't just noise—it can be a system failure. This toolbox provides the formal proof that your NN will behave across the entire input domain, even in the worst-case scenarios.
 
 ---
+## 🧠 Verification in a Nutshell
+
+Traditional testing evaluates a Neural Network at specific points, but it cannot prove what happens between those points. Neural Network Verification treats the model as a mathematical function and searches the entire continuous input space to find the absolute worst-case scenario. Instead of asking "Does it work on my test set?", we ask: "Is there any possible input where this model violates physics?" By using MILP and CROWN engines, this toolbox provides a formal certificate that no such failure exists, or identifies the exact counter-example if it does.
+
 
 ## ⚡ Quickstart
 
@@ -71,6 +75,7 @@ For detailed guides and tutorials, refer to our documentation suite:
 
 * **[Tutorial: Running an LP Example](./docs/tutorials/lp_proxy.md):** A comprehensive, step-by-step guide covering data generation, surrogate training, and executing your first verification.
 * **[Configuration Guide](./docs/configuration.md):** A complete breakdown of all `config.yaml` parameters, from solver selection to engine-specific settings.
+* **[Verification Theory](./docs/theory.md):** An explanation of how MILP and CROWN provide formal guarantees.
 
 ---
 
