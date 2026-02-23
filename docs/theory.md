@@ -18,7 +18,7 @@ A ReLU unit $y = \max(0, x)$ can be modeled exactly using **Big-M notation** and
 
 Once the network is encoded as a set of linear constraints, the toolbox transforms the verification task into an **adversarial optimization problem**. Instead of testing random points, the solver performs a global search to maximize a **Violation Metric** ($V$):
 
-$$V_{max} = \max_{x \in [L, U]} \left( \text{Surrogate}(x) - \text{Physics\_Limit}(x) \right)$$
+$$V_{max} = \max_{x \in [L, U]} \left( \text{Surrogate}(x) - \text{Physics}(x) \right)$$
 
 * **Safety Analysis (`constraint`):** The solver searches for the input $x$ that causes the largest physical violation. If $V_{max} \leq 0$, the model is formally proven safe.
 * **Optimality Analysis (`distance`):** The solver maximizes the gap between the NN prediction and the true mathematical optimum. This identifies the "Worst-Case Error" across the entire domain.
