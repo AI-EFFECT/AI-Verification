@@ -5,7 +5,9 @@ Neural Networks are powerful surrogates but remain "black boxes" that cannot gua
 ---
 ## 🧠 Verification in a Nutshell
 
-Traditional testing evaluates a Neural Network at specific points, but it cannot prove what happens between those points. Neural Network Verification treats the model as a mathematical function and searches the entire continuous input space to find the absolute worst-case scenario. Instead of asking "Does it work on my test set?", we ask: "Is there any possible input where this model violates physics?" By using MILP and CROWN engines, this toolbox provides a formal certificate that no such failure exists, or identifies the exact counter-example if it does.
+Traditional empirical testing relies on **point-based sampling**—evaluating a Neural Network on a finite test set. While this measures average performance, it leaves the "space between the points" unexamined, potentially hiding catastrophic failures in safety-critical systems. 
+
+**Neural Network Verification** shifts the paradigm from sampling to **formal proof**. By treating the model as a continuous mathematical function, the toolbox searches the entire input domain to find the absolute worst-case scenario. Instead of asking "Does it work on my test set?", we ask: **"Is there *any* possible input combination that violates physical laws?"** Using MILP and CROWN engines, the toolbox either provides a formal certificate that no such failure exists or identifies the exact **counter-example** where the system breaks.
 
 
 ## ⚡ Quickstart

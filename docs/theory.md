@@ -15,12 +15,12 @@ A ReLU unit $y = \max(0, x)$ can be modeled exactly using **Big-M notation** and
 2. If $z=0$, the neuron is inactive: $y = 0$.
 
 ### The Verification Objective: Adversarial Search
+
 Once the network is encoded as a set of linear constraints and binaries, the toolbox transforms the verification task into an **adversarial optimization problem**. Instead of testing random points, the solver performs a global search to maximize a **Violation Metric** ($V$):
 
-$$\text{Maximize } V(x) = \text{Surrogate}(x) - \text{Physics\_Limit}(x)$$
-$$\text{subject to: } x \in [L, U]$$
+$$V_{max} = \max_{x \in [L, U]} \quad \text{NN}(x) - \text{Physics\_Limit}(x)$$
 
-* **Safety Analysis (`constraint`):** The solver searches for the input $x$ that causes the largest physical violation. If the maximum $V \leq 0$, the model is formally proven safe.
+* **Safety Analysis (`constraint`):** The solver searches for the input $x$ that causes the largest physical violation. If $V_{max} \leq 0$, the model is formally proven safe.
 * **Optimality Analysis (`distance`):** The solver maximizes the gap between the NN prediction and the true mathematical optimum. This identifies the "Worst-Case Error" across the entire domain.
 
 By solving this to global optimality, the MILP engine provides a **Formal Certificate**: if the solver cannot find a single point where the metric exceeds your threshold, it is mathematically impossible for the network to fail within that domain.
