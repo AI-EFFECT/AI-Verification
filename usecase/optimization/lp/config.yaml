@@ -5,7 +5,7 @@ model_meta:
   architecture: feedforward
   activation: relu
   check: distance
-  report: yes
+  report: no
   solver: gurobi
   engine: milp
 proxy_spec:

@@ -9,6 +9,18 @@ Traditional empirical testing relies on **point-based sampling**—evaluating a 
 
 **Neural Network Verification** shifts the paradigm from sampling to **formal proof**. By treating the model as a continuous mathematical function, the toolbox searches the entire input domain to find the absolute worst-case scenario. Instead of asking "Does it work on my test set?", we ask: **"Is there *any* possible input combination that violates physical laws?"** Using MILP and CROWN engines, the toolbox either provides a formal certificate that no such failure exists or identifies the exact **counter-example** where the system breaks.
 
+## 🛠️ Installation & Setup
+
+To run this project, we recommend using [Conda](https://docs.anaconda.com/free/anaconda/install/index.html) to manage your dependencies and avoid version conflicts.
+
+### 1. Create the Environment
+First, clone the repository and navigate into the folder. Then, create the `verif_aie` environment:
+
+```bash
+# Using the environment.yml (Recommended for Conda users)
+conda env create -f environment.yml
+```
+
 
 ## ⚡ Quickstart
 
