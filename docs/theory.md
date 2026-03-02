@@ -26,7 +26,7 @@ $$V_{max} = \max_{x \in [L, U]} \left( \text{Surrogate}(x) - \text{Physics}(x) \
 By solving this to global optimality, the MILP engine provides a **Formal Certificate**: if the solver cannot find a single point where the metric exceeds your threshold, it is mathematically impossible for the network to fail within that domain.
 
 ### Pros & Cons
-* **Precision:** If the solver (Gurobi/CPLEX) finds a solution, it is the mathematically "perfect" worst-case.
+* **Precision:** If the solver finds a solution, it is the mathematically "perfect" worst-case.
 * **Counter-Examples:** If a safety property is broken, MILP gives you the exact input coordinates of the failure.
 * **Cost:** It is computationally "NP-Hard." For very large networks, the number of binary combinations ($2^{neurons}$) becomes too large to solve quickly.
 
@@ -36,7 +36,7 @@ By solving this to global optimality, the MILP engine provides a **Formal Certif
 CROWN (Linear Bound Propagation) takes a different approach. Instead of using binary variables, it "sandwiches" every neuron between two linear functions.
 
 For any non-linear activation $\sigma(x)$, CROWN finds two lines such that:
-$$\mathbf{A}_{low}x + b_{low} \leq \sigma(x) \leq \mathbf{A}_{up}x + b_{up}$$
+$\mathbf{A}_{low}x + b_{low} \leq \sigma(x) \leq \mathbf{A}_{up}x + b_{up}$
 
 By propagating these linear bounds from the input layer to the output layer, CROWN calculates a **Formal Bound** on the output.
 

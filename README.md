@@ -14,11 +14,14 @@ Traditional empirical testing relies on **point-based sampling**—evaluating a 
 
 Bridge the gap between **PyTorch** and **Pyomo** in minutes. This toolbox automates the generation of a formal safety certificate for your neural network surrogates.
 
+> [!NOTE]
+> Currently the toolbox is only capably of verifying **Neural Network** surrogates which are trained to approximate the solution of an **optimization** problem.
+
 ### 1. Define Your Physics
 Model your system's constraints and objectives using standard **Pyomo** syntax. Save this as a `.py` file in the `models/` folder. This acts as the "Ground Truth" for the verifier. *See a Linear Programming example:* [`lp_physics.py`](./models/lp_physics.py)
 
 ### 2. Connect Your Surrogate
-Provide your trained Neural Network weights (currently supporting **PyTorch** `.pt` files). Place your model in the `models/` folder alongside your physics definition.
+Provide your trained Neural Network weights (currently supporting **PyTorch** `.pt` files). Place your model in the `models/` folder alongside your physics definition (your **Pyomo** model).
 
 ### 3. Formally Verify
 Define your verification parameters in `config.yaml`, then trigger the verification toolbox:
@@ -28,11 +31,11 @@ Define your verification parameters in `config.yaml`, then trigger the verificat
 
 ```yaml
 model_meta:
-  name:         lp_proxy
-  pclass:       optimization
-  ptype:        lp
-  architecture: feedforward
-  activation:   relu
+  name:         lp_proxy      # name your proxy
+  pclass:       optimization  # define the problem class (currently only 'optimization' supported)
+  ptype:        lp            # define the problem type (lp = linear program)
+  architecture: feedforward   # define your neural network architecture
+  activation:   relu          # define your neural network activation functions
   check:        constraint    # 'constraint' (safety) or 'distance' (optimality)
   report:       yes           # Generates an interactive Jupyter audit of the worst-case failure in /output
   solver:       gurobi        # MILP solver
