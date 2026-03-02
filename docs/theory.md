@@ -36,7 +36,7 @@ By solving this to global optimality, the MILP engine provides a **Formal Certif
 CROWN (Linear Bound Propagation) takes a different approach. Instead of using binary variables, it "sandwiches" every neuron between two linear functions.
 
 For any non-linear activation $\sigma(x)$, CROWN finds two lines such that:
-$\mathbf{A}_{low}x + b_{low} \leq \sigma(x) \leq \mathbf{A}_{up}x + b_{up}$
+$$\mathbf{A}_{low}x + b_{low} \leq \sigma(x) \leq \mathbf{A}_{up}x + b_{up}$$
 
 By propagating these linear bounds from the input layer to the output layer, CROWN calculates a **Formal Bound** on the output.
 

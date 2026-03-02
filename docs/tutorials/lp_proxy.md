@@ -47,9 +47,10 @@ balance_expr = sum(model.x_in[i] for i in input_idxs) - \
 model.cons.add(balance_expr == 0)
 ```
 
-**Implementation:** This is unrolled into two inequalities: 
+**Under the hood:** This is unrolled into two inequalities: 
 1. $(\sum x_{out} - \sum x_{in}) \le \epsilon$
 2. $-(\sum x_{out} - \sum x_{in}) \le \epsilon$
+
 This creates a "thin corridor" of feasibility, forcing the NN to balance the system perfectly.
 
 ### B. Safety Limits (Inequalities)
