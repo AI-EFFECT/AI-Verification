@@ -13,7 +13,7 @@ Traditional empirical testing relies on **point-based sampling**—evaluating a 
 
 To run this project, we recommend using [Conda](https://docs.anaconda.com/free/anaconda/install/index.html) to manage your dependencies and avoid version conflicts.
 
-### 1. Create the Environment
+### Create the Environment
 First, clone the repository and navigate into the folder. Then, create the `verif_aie` environment:
 
 ```bash
