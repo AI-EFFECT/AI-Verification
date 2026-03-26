@@ -95,6 +95,8 @@ def get_io_mapping(model):
 
 </details>
 
+---
+
 ## 2. Save Weights: Trained Neural Network
 
 If you trained a neural network using Pytorch, simply upload the .pt model to the `models/` folder. If you used any other packages (TensorFlow, Keras, Jax), ensure you convert the model to a PyTorch state dictionary format before verification.

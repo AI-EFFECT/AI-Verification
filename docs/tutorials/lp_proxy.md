@@ -2,6 +2,8 @@
 
 This tutorial implements a Neural Network Surrogate for Linear Programming (LP) problems. While NNs are excellent at approximating solvers, they cannot natively enforce hard physical constraints. This toolbox provides the formal verification necessary to prove safety across the entire input domain.
 
+> **How to use this guide:** > This tutorial is structured in two parts. The **Theoretical Framework** explains the mathematical foundations of LP proxy verification, while the **Hands-on Tutorial** provides a step-by-step implementation where you will execute scripts to generate data, train a model, and verify its safety.
+
 ---
 # 📘 Part 1: Theoretical Framework
 *Understanding the math behind the verification.*
@@ -90,7 +92,7 @@ If the **Max Violation** across all rows of $A$ is less than our tolerance ($\ep
 
 
 ---
----
+
 
 # 🚀 Part 2: Hands-on Tutorial (LP Proxy)
 *Follow these steps to generate data, train your model, and verify it.*
@@ -112,7 +114,8 @@ python usecase/optimization/lp/generate.py
 
 ```
 
-> [!NOTE]: This script generates the following physics definition file for you, and places it in the correct folder.
+> [NOTE] 
+> This script generates the following physics definition file for you, and places it in the correct folder.
 
 <details>
 <summary>🔍 View Pyomo Model Definition (Python Example)</summary>
