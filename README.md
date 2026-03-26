@@ -94,7 +94,7 @@ For detailed guides and tutorials, refer to our documentation suite:
 * **[Configuration Guide](./docs/configuration.md):** A complete breakdown of all `config.yaml` parameters, from solver selection to engine-specific settings.
 * **[Verification Theory](./docs/theory.md):** An explanation of how MILP and CROWN provide formal guarantees.
 
----
+
 
 ## 🛠️ Project Structure
 ```text
@@ -111,10 +111,32 @@ For detailed guides and tutorials, refer to our documentation suite:
 ```
 
 
+## 🤝 Contributing
+
+We welcome contributions to the **Neural Network Verification Toolbox**! Whether you are fixing a bug, adding a new problem class, or improving documentation:
+
+1. **Fork** the repository.
+2. Create a **Feature Branch** (`git checkout -b feature/AmazingFeature`).
+3. **Commit** your changes (`git commit -m 'Add some AmazingFeature'`).
+4. **Push** to the branch (`git push origin feature/AmazingFeature`).
+5. Open a **Pull Request**.
+
+Please ensure your code follows the existing project structure and includes necessary tests.
+
+## 📧 Contact & Support
+
+For questions, bug reports, or collaboration inquiries, please reach out to the project maintainers:
+
+* **Main Contact:** Bastien Giraud - bagir@dtu.dk
+* **Supervision:** Johanna Vorwerk, Spyros Chatzivasileiadis
 
 
 ---
 
 ## 📚 References & Acknowledgments
 
-This toolbox utilizes the [auto_LiRPA](https://github.com/Verified-Intelligence/auto_LiRPA) library for robust neural network bounding and formal verification.
+This toolbox is built upon the following foundational research and libraries:
+
+* **Formal Robustness:** Xu et al. (2020) and the [auto_LiRPA](https://github.com/Verified-Intelligence/auto_LiRPA) library.
+* **Neural Network Verification:** Venzke et al. (2020) for worst-case guarantees in power systems.
+* **Modeling:** [Pyomo](http://www.pyomo.org/) and [PyTorch](https://pytorch.org/).
