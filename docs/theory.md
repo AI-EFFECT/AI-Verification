@@ -61,5 +61,5 @@ By propagating these linear bounds from the input layer to the output layer, CRO
 
 ## References
 
-1. A. Venzke, G. Qu, S. Low, and S. Chatzivasileiadis, "Learning optimal power flow: Worst-case guarantees for neural networks," in *2020 IEEE International Conference on Communications, Control, and Computing Technologies for Smart Grids (SmartGridComm)*, 2020, pp. 1–7. [Link to Paper](https://ieeexplore.ieee.org/document/9283038)
-2. K. Xu et al., "Automatic perturbation analysis for scalable certified robustness and beyond," *Advances in Neural Information Processing Systems*, vol. 33, pp. 1129–1141, 2020. [Link to Paper](https://proceedings.neurips.cc/paper/2020/hash/0f0474026330032e3d81997d6ca06979-Abstract.html)
+1. A. Venzke, G. Qu, S. Low, and S. Chatzivasileiadis, "Learning optimal power flow: Worst-case guarantees for neural networks," in *2020 IEEE International Conference on Communications, Control, and Computing Technologies for Smart Grids (SmartGridComm)*, 2020, pp. 1–7. 
+2. K. Xu et al., "Automatic perturbation analysis for scalable certified robustness and beyond," *Advances in Neural Information Processing Systems*, vol. 33, pp. 1129–1141, 2020. 

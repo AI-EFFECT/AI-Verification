@@ -137,6 +137,6 @@ For questions, bug reports, or collaboration inquiries, please reach out to the 
 
 This toolbox is built upon the following foundational research and libraries:
 
-* **Formal Robustness:** K. Xu et al., "Automatic perturbation analysis for scalable certified robustness and beyond," *Advances in Neural Information Processing Systems*, vol. 33, pp. 1129–1141, 2020. [Link to Paper](https://proceedings.neurips.cc/paper/2020/hash/0f0474026330032e3d81997d6ca06979-Abstract.html) and the [auto_LiRPA](https://github.com/Verified-Intelligence/auto_LiRPA) library.
-* **Neural Network Verification:** A. Venzke, G. Qu, S. Low, and S. Chatzivasileiadis, "Learning optimal power flow: Worst-case guarantees for neural networks," in *2020 IEEE International Conference on Communications, Control, and Computing Technologies for Smart Grids (SmartGridComm)*, 2020, pp. 1–7. [Link to Paper](https://ieeexplore.ieee.org/document/9283038)
+* **Formal Robustness:** K. Xu et al., "Automatic perturbation analysis for scalable certified robustness and beyond," *Advances in Neural Information Processing Systems*, vol. 33, pp. 1129–1141, 2020. and the [auto_LiRPA](https://github.com/Verified-Intelligence/auto_LiRPA) library.
+* **Neural Network Verification:** A. Venzke, G. Qu, S. Low, and S. Chatzivasileiadis, "Learning optimal power flow: Worst-case guarantees for neural networks," in *2020 IEEE International Conference on Communications, Control, and Computing Technologies for Smart Grids (SmartGridComm)*, 2020, pp. 1–7.
 * **Modeling:** [Pyomo](http://www.pyomo.org/) and [PyTorch](https://pytorch.org/).
