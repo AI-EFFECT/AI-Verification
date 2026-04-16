@@ -61,16 +61,20 @@ The tool generates a Jupyter Notebook Report in the output/ folder utilizing for
 * **Potential Violation:** If the value is > 10^-6, the report highlights which physical limit (e.g., Pg Upper Bound or Vm Lower Bound) is at risk.
 * **Feasibility Residual:** The I-Balance table shows the KCL mismatch, indicating how physically consistent the predicted voltages are with the current loads.
 
+For an example output report, please check: [ACOPF Report](../../output/report_constraint_20260416_113344.ipynb)
+
 ---
 
 ## 📚 References & Methodology
 The methodology implemented in this tool, specifically the unrolling of the Voltage NN for formal verification, is based on:
 
+```bibtex
 @article{giraud2025neural,
   title={Neural Networks for AC Optimal Power Flow: Improving Worst-Case Guarantees during Training},
   author={Giraud, Bastien and Nellikkath, Rahul and Vorwerk, Johanna and Alowaifeer, Maad and Chatzivasileiadis, Spyros},
   journal={arXiv preprint arXiv:2510.23196},
   year={2025}
 }
+```
 
 ***
