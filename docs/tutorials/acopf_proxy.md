@@ -3,13 +3,22 @@
 
 This guide explains how to formally verify Neural Network proxies designed for the Alternating Current Optimal Power Flow (ACOPF) problem using this toolbox.
 
+
 ## 📖 Problem Formulation
-The verifier is specialized for **Voltage-based Neural Networks**, as proposed in recent literature for improving worst-case guarantees. Unlike traditional proxies that predict generation directly, this model maps power demands to the complex voltage state, ensuring the system state is intrinsically defined.
+This verifier is built specifically for **Voltage-based Neural Networks** (Giraud et al., 2025). Unlike generation-based proxies, this architecture ensures the system state is physically defined by mapping demands to complex voltages.
 
-* **Inputs:** Active Power Demand (Pd) and Reactive Power Demand (Qd) for all buses.
-* **Outputs:** Real and Imaginary components of Voltage (Vr, Vi) for all buses. 
+* **Inputs ($x$):** Active ($P_d$) and Reactive ($Q_d$) power demand for all buses.
+* **Outputs ($y$):** Real ($V_r$) and Imaginary ($V_i$) voltage components for all buses.
 
-The verifier uses the predicted (Vr, Vi) to unroll the grid's physical laws, checking constraints across the entire continuous input uncertainty set.
+The verifier "unrolls" these voltages using the AC power flow equations to formally certify generation limits and branch flows.
+
+## ⚠️ Compatibility & Requirements
+The current implementation has the following strict dependencies:
+
+* **Architecture:** Only **Voltage NNs** are supported. Models that predict generation ($P_g, Q_g$) or voltage polar coordinates ($|V|, \theta$) directly are incompatible with the current physics-unrolling logic.
+* **Engine:** Optimized exclusively for **$\alpha, \beta$-CROWN**.
+* **Naming Convention:** Files **must** follow the `acopf_XX_bus` format (e.g., `acopf_57_bus.pt`). The verifier extracts the integer `XX` to automatically configure the grid topology and constraint dimensions.
+
 
 ---
 
