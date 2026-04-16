@@ -5,6 +5,7 @@ import numpy as np
 from typing import List, Tuple, Any
 from dataclasses import dataclass
 from pathlib import Path
+from ..models.acopf_augmented_model import OutputWrapper, NeuralNetwork
 
 class LayerReconstructor(ABC):
     """Abstract strategy for converting config data into PyTorch modules."""
@@ -199,8 +200,6 @@ class NNLoader:
             raise ValueError(f"No parser registered for ptype: {problem_type}")
             
         return parser.parse(self.spec_raw)
-
-
 
 
 

@@ -21,6 +21,7 @@ logging.getLogger().setLevel(logging.WARNING)
 
 """
 python main.py usecase/optimization/lp/config.yaml
+python main.py usecase/optimization/acopf/config.yaml
 
 to do:
 - now you fill in a optimization model. The extractor in opt_loader should concert into A, b and c matrices, and fill in in config what type of optimization it is
@@ -71,19 +72,24 @@ def main():
     # 3. Verification Execution
     try:
         # Initialize Data Loader
-        config_data = OptimizationLoader(config_data).enrich_config()
+        # Safely check if 'opt_path' exists within 'proxy_spec'
+        proxy_spec = config_data.get('proxy_spec', {})
+
+        if 'opt_path' in proxy_spec and proxy_spec['opt_path']:
+            # Only runs if 'opt_path' is present AND not an empty string/None
+            config_data = OptimizationLoader(config_data).enrich_config()
         
         loader = NNLoader(config_data)
         model_name = loader.meta.get('name', 'Unnamed_Model')
 
         # Route to Engine
-        runner = get_runner(loader, config_data)
+        runner = get_runner(loader, config_data) # this retrieves the 'run_lp_verification', 'run_acopf_verification' etc. functions based on the config
 
         print(f"[*] Executing verification for model: {model_name}")
         print(f"{'-'*60}")
         
         # Unified Execution Interface
-        results = runner(loader)
+        results = runner(loader) # this ruyns the 'run_lp_verification', 'run_acopf_verification' etc. functions based on the config
 
         # 4. Report Generation
         report_setting = config_data.get('model_meta', {}).get('report', True)

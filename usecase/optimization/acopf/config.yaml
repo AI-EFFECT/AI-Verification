@@ -1,0 +1,12 @@
+model_meta:
+  name: acopf_57_bus
+  pclass: optimization
+  ptype: acopf
+  architecture: feedforward
+  activation: relu
+  check: constraint
+  report: 'yes'
+  solver: gurobi
+  engine: crown
+proxy_spec:
+  nn_path: models/acopf_example.pt

@@ -8,6 +8,7 @@ def generate_report(results, config, output_path="output/"):
     check_type = config['model_meta'].get('check', 'distance')
     engine_type = config['model_meta'].get('engine', 'milp')
     solver_type = config['model_meta'].get('solver', 'gurobi')
+    problem_type = config['model_meta'].get('ptype', 'acopf')
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     cons_names = config.get('verification_spec', {}).get('constraints', {}).get('names', [])
     v_spec = config.get('verification_spec', {})
@@ -17,7 +18,18 @@ def generate_report(results, config, output_path="output/"):
     nb['cells'].append(nbf.v4.new_markdown_cell(f"{title}\n**Generated on:** {timestamp}"))
     
     # --- 2. Methodology Explanation ---
-    if check_type == "constraint":
+    if problem_type == "acopf":
+        methodology_md = (
+            "## 📖 Methodology: Interval-Based Verification\n"
+            "This report uses **alpha-CROWN**, McCormick relaxations and alpha-max beta-min relaxations to verify the grid safety.\n\n"
+            "1. **Interval Bounds:** Unlike point-checks, this method calculates the **Global Max/Min** "
+            "for every operational constraint across the entire input uncertainty range.\n"
+            "2. **Certified Safety:** If a 'Max Violation' is 0.000000, it is a **mathematical proof** "
+            "that the grid will never exceed that limit within the specified load ranges.\n"
+            "3. **Feasibility Residual (Ibal):** Measures the KCL mismatch. High residuals indicate "
+            "the Neural Network is struggling to maintain physical power flow consistency."
+        )
+    elif check_type == "constraint" and problem_type != "acopf":
         methodology_md = (
             "## 📖 Methodology & Interpretation\n"
             "This report provides a **formal safety audit** of the Neural Network. Please note the following regarding the results:\n\n"
@@ -26,7 +38,7 @@ def generate_report(results, config, output_path="output/"):
             "2. **Snapshot Inference:** All values in the tables below (Inputs, Outputs, and Violations) are derived from this **single worst-case point**. "
             "While one constraint may be the 'Max Violator' at this point, the other rows show how the rest of the system behaves at that same failing state. "
             "**Note:** There may exist other inputs where different constraints are violated more heavily than what is portrayed in this specific snapshot.\n"
-            "3. **Equality Relaxation:** Physical equalities (e.g., $A=B$) are mathematically unrolled into two inequalities ($A-B \le \epsilon$ and $B-A \le \epsilon$) "
+            r"3. **Equality Relaxation:** Physical equalities (e.g., $A=B$) are mathematically unrolled into two inequalities ($A-B \le \epsilon$ and $B-A \le \epsilon$) "
             "using a precision tolerance of $10^{-6}$. This allows you to identify whether the failure is a **shortfall** or an **excess** relative to the target balance.\n"
             "4. **Global Guarantees:** If the 'Worst Violation' is within tolerance, it constitutes a **mathematical proof** that the network is safe across "
             "the *entire* continuous input range defined in the configuration."
@@ -55,7 +67,50 @@ def generate_report(results, config, output_path="output/"):
     # --- 4. High-Level Metrics & Status ---
     solve_time = results.get('runtime_sec', 0.0)
     
-    if check_type == "distance":
+    # --- 3. ACOPF Specific Summary Table ---
+    if problem_type == "acopf":
+        # 1. Overall Safety Calculation
+        max_phys = max(results.get('Pg tot Max Violation', 0.0), results.get('Qg tot Max Violation', 0.0),
+                       results.get('Vm tot Max Violation', 0.0), results.get('Ibr tot Max Violation', 0.0))
+        status = "✅ CERTIFIED SAFE" if max_phys < 1e-6 else "❌ VIOLATION"
+        
+        # 2. Main Summary Cell
+        summary_md = (
+            f"### ⏱️ Performance & Safety Status\n"
+            f"- **System Status:** `{status}`\n"
+            f"- **Solve Time:** `{solve_time:.4f}s`\n"
+            f"- **Engine:** `alpha-beta-CROWN`\n\n"
+            f"| Physical Limit Group | Max Worst-Case Violation | Status |\n"
+            f"| :--- | :--- | :--- |\n"
+            f"| **Real Power (Pg)** | `{results.get('Pg tot Max Violation', 0.0):.6f}` | {'✅' if results.get('Pg tot Max Violation', 0.0) < 1e-6 else '❌'} |\n"
+            f"| **Reactive Power (Qg)** | `{results.get('Qg tot Max Violation', 0.0):.6f}` | {'✅' if results.get('Qg tot Max Violation', 0.0) < 1e-6 else '❌'} |\n"
+            f"| **Voltage Mag (Vm)** | `{results.get('Vm tot Max Violation', 0.0):.6f}` | {'✅' if results.get('Vm tot Max Violation', 0.0) < 1e-6 else '❌'} |\n"
+            f"| **Branch Current (Ibr)** | `{results.get('Ibr tot Max Violation', 0.0):.6f}` | {'✅' if results.get('Ibr tot Max Violation', 0.0) < 1e-6 else '❌'} |"
+        )
+        nb['cells'].append(nbf.v4.new_markdown_cell(summary_md))
+        
+        # 3. KCL Residuals Cell
+        ibal_md = (
+            "### ⚖️ KCL / Feasibility Residuals\n"
+            f"| Metric | Value | Interpretation |\n"
+            f"| :--- | :--- | :--- |\n"
+            f"| **Max I-Balance Residual** | `{results.get('Ibal tot Max Violation', 0.0):.6f}` | Worst-case bus mismatch |\n"
+            f"| **Avg I-Balance Residual** | `{results.get('Ibal tot Avg Violation', 0.0):.6f}` | System-wide mean mismatch |"
+        )
+        nb['cells'].append(nbf.v4.new_markdown_cell(ibal_md))
+
+        # 4. Detailed Directional Table Cell
+        details_md = "### 📏 Detailed Directional Violations\n"
+        details_md += "| Constraint | Max Violation | Avg Violation |\n| :--- | :--- | :--- |\n"
+        for label, prefix in [('Pg Upper', 'Pg Up'), ('Pg Lower', 'Pg Down'), ('Qg Upper', 'Qg Up'), 
+                             ('Qg Lower', 'Qg Down'), ('Vm Upper', 'Vm Up'), ('Vm Lower', 'Vm Down')]:
+            m_v = results.get(f'{prefix} Max Violation', 0.0)
+            a_v = results.get(f'{prefix} Avg Violation', 0.0)
+            details_md += f"| {label} | `{m_v:.6f}` | `{a_v:.6f}` |\n"
+        nb['cells'].append(nbf.v4.new_markdown_cell(details_md))
+
+
+    elif check_type == "distance":
         gap = results.get('optimality_gap', 0.0)
         status = "✅ OPTIMAL" if gap < 1e-4 else "❌ SUBOPTIMAL"
         # Calculate costs
@@ -74,6 +129,7 @@ def generate_report(results, config, output_path="output/"):
             f"- **Solve Time:** `{solve_time:.4f}s`\n"
             f"- **Engine:** `{engine_type}`"
         )
+        nb['cells'].append(nbf.v4.new_markdown_cell(audit_md))
     else:
         max_viol = results.get('max_violation', 0.0)
         status = "✅ FEASIBLE" if max_viol < 1e-4 else "❌ VIOLATED"
@@ -86,14 +142,15 @@ def generate_report(results, config, output_path="output/"):
             f"- **Engine:** `{engine_type}`\n"
             f"- **Solver:** `{solver_type}`"
         )
-    nb['cells'].append(nbf.v4.new_markdown_cell(audit_md))
+        nb['cells'].append(nbf.v4.new_markdown_cell(audit_md))
     
-    # ---   Search Space ---
-    metadata_md = "### 📑 Verification Search Space\n| Variable | Search Range | Type |\n| :--- | :--- | :--- |\n"
-    for i, idx in enumerate(input_indices):
-        b = bounds_list[i] if i < len(bounds_list) else {'min': '?', 'max': '?'}
-        metadata_md += f"| Input {idx} | `[{b.get('min')}, {b.get('max')}]` | Continuous |\n"
-    nb['cells'].append(nbf.v4.new_markdown_cell(metadata_md))
+    if problem_type != "acopf":
+        # ---   Search Space ---
+        metadata_md = "### 📑 Verification Search Space\n| Variable | Search Range | Type |\n| :--- | :--- | :--- |\n"
+        for i, idx in enumerate(input_indices):
+            b = bounds_list[i] if i < len(bounds_list) else {'min': '?', 'max': '?'}
+            metadata_md += f"| Input {idx} | `[{b.get('min')}, {b.get('max')}]` | Continuous |\n"
+        nb['cells'].append(nbf.v4.new_markdown_cell(metadata_md))
 
     # --- 5. Variable Comparison (Distance Mode Only) ---
     if check_type == "distance":
@@ -107,19 +164,20 @@ def generate_report(results, config, output_path="output/"):
             comp_md += f"| {i} | {c[i]:.4f} | {x_nn[i]:.4f} | {x_star[i]:.4f} | {diff:+.4f} |\n"
         nb['cells'].append(nbf.v4.new_markdown_cell(comp_md))
 
-    # --- 6. Component Analysis Section ---
-    in_vals = [f"{v:.4f}" for v in results.get('at_input_val', [])]
-    out_vals = [f"{v:.4f}" for v in results.get('nn_vals', [])]
-    comp_md = (
-        "### 🔍 Component Analysis (Worst-Case Snapshot)\n"
-        "| Component | Indices | Values |\n| :--- | :--- | :--- |\n"
-        f"| **NN Inputs** | `{input_indices}` | `{in_vals}` |\n"
-        f"| **NN Outputs** | `{output_indices}` | `{out_vals}` |"
-    )
-    nb['cells'].append(nbf.v4.new_markdown_cell(comp_md))
+    if problem_type != "acopf":
+        # --- 6. Component Analysis Section ---
+        in_vals = [f"{v:.4f}" for v in results.get('at_input_val', [])]
+        out_vals = [f"{v:.4f}" for v in results.get('nn_vals', [])]
+        comp_md = (
+            "### 🔍 Component Analysis (Worst-Case Snapshot)\n"
+            "| Component | Indices | Values |\n| :--- | :--- | :--- |\n"
+            f"| **NN Inputs** | `{input_indices}` | `{in_vals}` |\n"
+            f"| **NN Outputs** | `{output_indices}` | `{out_vals}` |"
+        )
+        nb['cells'].append(nbf.v4.new_markdown_cell(comp_md))
 
     # --- 7. Detailed Constraint Table (Constraint Mode Only) ---
-    if check_type == "constraint":
+    if check_type == "constraint" and problem_type != "acopf":
         worst_idx = results.get('worst_row_idx', -1)
         A = np.array(v_spec.get('constraints', {}).get('A', []))
         b = np.array(v_spec.get('constraints', {}).get('b_static', []))
@@ -143,8 +201,22 @@ def generate_report(results, config, output_path="output/"):
         nb['cells'].append(nbf.v4.new_markdown_cell(table_md))
 
     # --- 8. Visualizations ---
-    # ... [Same visualization logic as before] ...
-    if check_type == "distance":
+    if problem_type == "acopf":
+        viz_code = f"""
+import matplotlib.pyplot as plt
+metrics = {{
+    'Pg': {results.get('Pg tot Max Violation', 0.0)},
+    'Qg': {results.get('Qg tot Max Violation', 0.0)},
+    'Vm': {results.get('Vm tot Max Violation', 0.0)},
+    'Ibr': {results.get('Ibr tot Max Violation', 0.0)}
+}}
+plt.figure(figsize=(8, 4))
+plt.bar(metrics.keys(), metrics.values(), color=['#e74c3c' if v > 1e-6 else '#2ecc71' for v in metrics.values()])
+plt.axhline(y=1e-6, color='gray', linestyle='--', label='Threshold')
+plt.ylabel('Max Violation (pu)'); plt.title('ACOPF Safety Violations'); plt.legend(); plt.show()
+        """
+    
+    elif check_type == "distance":
         viz_code = f"""
 import matplotlib.pyplot as plt
 import numpy as np
