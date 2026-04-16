@@ -79,7 +79,7 @@ For an example output report, please check: [ACOPF Report](../../output/report_c
 ## 📚 References & Methodology
 The methodology implemented in this tool, specifically the verification-informed training, is based on:
 
-* **Paper:** [Neural Networks for AC Optimal Power Flow: Improving Worst-Case Guarantees during Training](https://arxiv.org/abs/2510.23196) (Giraud et al., 2025).
+* **Paper:** [Neural Networks for AC Optimal Power Flow: Improving Worst-Case Guarantees during Training](https://arxiv.org/abs/2510.23196).
 * **Training Code:** The proxies verified here are trained using the framework available at [bastiengiraud/AC-OPF-verification](https://github.com/bastiengiraud/AC-OPF-verification.git).
 
 ```bibtex
