@@ -10,7 +10,7 @@ This verifier is built specifically for **Voltage-based Neural Networks** (Girau
 * **Inputs ($x$):** Active ($P_d$) and Reactive ($Q_d$) power demand for all buses.
 * **Outputs ($y$):** Real ($V_r$) and Imaginary ($V_i$) voltage components for all buses.
 
-The verifier "unrolls" these voltages using the AC power flow equations to formally certify generation limits and branch flows.
+The verifier "unrolls" these voltages to all operational states to formally certify generation limits and branch flows.
 
 ## ⚠️ Compatibility & Requirements
 The current implementation has the following strict dependencies:
